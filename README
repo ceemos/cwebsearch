@@ -1,0 +1,25 @@
+A web frontend for Russ Cox' awesome Go codesearch:
+http://code.google.com/p/codesearch/
+
+Results are displayed as you type. Not intended for use over the Internet.
+
+Usage:
+
+first get cindex and csearch running, something like:
+go get code.google.com/p/codesearch/cmd/cindex
+go get code.google.com/p/codesearch/cmd/csearch
+
+Then you should be able to `go run cwebsearch.go`
+
+Build an index with cindex first, then run cwebsearch. A browser should show 
+the search form on http://localhost:4000.
+
+
+TODO:
+- The web-frontend could use some stylesheets and more functionality.
+- the inbuilt grep needs to be modified to show more context around a line.
+
+LICENSE:
+BSD-Style, like the original Go code.
+
+
