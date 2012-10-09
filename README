@@ -1,5 +1,9 @@
+cwebsearch
+==========
+
 A web frontend for Russ Cox' awesome Go codesearch:
 http://code.google.com/p/codesearch/
+(Theory: http://swtch.com/~rsc/regexp/regexp4.html )
 
 Results are displayed as you type. Not intended for use over the Internet.
 
