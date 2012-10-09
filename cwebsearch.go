@@ -1,6 +1,8 @@
-// Copyright 2011 The Go Authors.  All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright 2012 Marcel Schneider
+// heavily based on csearch:
+	// Copyright 2011 The Go Authors.  All rights reserved.
+	// Use of this source code is governed by a BSD-style
+	// license that can be found in the LICENSE file.
 
 package main
 
@@ -21,6 +23,8 @@ import (
 	
 	"net/http"
 )
+
+// Web serving code
 func handleQuery(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/cws.js" {
 		w.Header().Set("Content-Type", "text/javascript")
@@ -82,7 +86,7 @@ func writeFile(w http.ResponseWriter, file string) {
 }
 
 
-var usageMessage = `usage: cwebsearch [-v]
+var usageMessage = `usage: cwebsearch 
 `
 
 func usage() {
@@ -120,14 +124,15 @@ func query(patterns []string, fFlag string, iFlag bool, out io.Writer, limit int
 			return
 		}
 	}
-	outchan := make(chan string)
-	matchchan := make(chan bool)
-	timeout := make(chan bool)
+	outchan := make(chan string) // all output ist collected here.
+	matchchan := make(chan bool) // grep's tell whether thy found sth.
+	stopchan := make(chan bool) // grep's listen here to be stopped
+	timeout := make(chan bool) // delivers a timeout for this function
 	go func() {
         time.Sleep(timelimit)
         timeout <- true
     }()
-	stopchan := make(chan bool)
+	
 	g := make([]*Grep, 0, len(patterns))
 	for _, v := range patterns {
 		pat := "(?m)" + v
@@ -200,6 +205,8 @@ func query(patterns []string, fFlag string, iFlag bool, out io.Writer, limit int
 		}
 		runningcount := len(g)
 		
+		// Counting is critical here. Read once from matchchan and write once 
+		// to stopchan for ech grep - or everything will deadlock.
 		matched := true
 		for runningcount > 0 {
 			select {
@@ -251,6 +258,7 @@ func query(patterns []string, fFlag string, iFlag bool, out io.Writer, limit int
 	return
 }
 
+// based on regexp.Grep, modded for channel communication
 type Grep struct {
 	Regexp *regexp.Regexp   // regexp to search for
 	
